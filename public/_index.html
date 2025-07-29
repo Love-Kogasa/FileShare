@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${title}</title>
+    <meta name="description" content="${description}">
+    <meta name="keywords" content="${keywords}">
+    <meta name="author" content="${author}">
+    <meta charset="UTF-8">
+   
+    <!-- Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/${hightlight-theme}.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/go.min.js"></script>
+
+    <link rel="stylesheet" href="/public/styles.css">
+  </head>
+  <body>
+    <div class="navbar" onclick="(window.location.href = '/')">
+      <img src="${avatar}" class="icon">
+      <span style="max-width: 70vw; overflow: auto;">${title}</span>
+    </div>
+    <div class="container">
+      <div id="win-des">
+        <blockquote cite="${author}">${description}</blockquote>
+      </div>
+      <div id="win-files">
+        <board>
+          <now>当前路径: <span id="path">${path}</span></now>
+        </board>
+        <board id="files">
+          ${empty-folder}
+        </board>
+      </div>
+      <div id="win-readme">
+        <board id="readme">
+          ${no-readme}
+        </board>
+      </div>
+    </div>
+    <script>hljs.highlightAll()</script>
+  </body>
+</html>

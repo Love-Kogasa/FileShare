@@ -1,0 +1,13 @@
+:root {
+  --font: ${font};
+  --bar-color: ${bar-color};
+  --bar-font-color: ${bar-font-color};
+  --bar-shadow: ${bar-shadow};
+  --background-color: ${background-color};
+  --font-color: ${font-color};
+  --background-image: ${background-image};
+  --bar-color-alpha: ${bar-color-alpha};
+  --board-color: ${board-background-color};
+  --board-text-color: ${board-text-color};
+  --comment-color: ${comment-color};
+}
