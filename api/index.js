@@ -7,6 +7,7 @@ const mimetype = require( "mimetype" )
 const fsize = require( "file-size" )
 const {Jimp} = require( "jimp" )
 const fnet = require( "./fsurl" )
+const url = require( "url" )
 
 // 针对vercel执行路径问题
 var config = ini.parse( fs.readFileSync( __dirname + "/../config.ini" ).toString() )
@@ -29,24 +30,36 @@ function getRealPath( url ){
 }
 
 function getPath( url ){
-  var filePath = getRealPath( url )
-  var dir = fs.readdirSync(filePath, { withFileTypes:true })
-  var diroutput = [], readme = "", empty
-  dir.forEach(( v, i ) => {
-    var fdata = {name: v.name, isdir: v.isDirectory(), realsize: v.size, size: fsize(v.size).human( "jedec" )}
-    if( v.name.toLowerCase() == "readme.md" )
-      readme = fs.readFileSync( path.join( filePath, v.name ) ).toString()
-    if( path.extname( v.name ) == ".fsurl" ){
-      var {subject, proxy} = fnet.parse(fs.readFileSync( path.join( filePath, v.name)).toString())
-      fdata.name = path.basename(subject)
-      fdata.proxy = proxy
-      fdata.realname = v.name
-      fdata.url = subject
-    }
-    diroutput[i] = fdata
-  })
-  if( !dir[0] ) empty = true
-  return { diroutput, readme, empty }
+  var filePath = getRealPath( url ), fstat = fs.statSync( filePath )
+  if( fstat.isDirectory() ){
+    var dir = fs.readdirSync(filePath, { withFileTypes:true })
+    var diroutput = [], readme = "", empty
+    dir.forEach(( v, i ) => {
+      var fdata = {name: v.name, isdir: v.isDirectory(), realsize: v.size, size: fsize(v.size).human( "jedec" )}
+      if( v.name.toLowerCase() == "readme.md" )
+        readme = fs.readFileSync( path.join( filePath, v.name ) ).toString()
+      if( path.extname( v.name ) == ".fsurl" ){
+        var {subject, proxy} = fnet.parse(fs.readFileSync( path.join( filePath, v.name)).toString())
+        fdata.name = path.basename(subject)
+        fdata.proxy = proxy
+        fdata.realname = v.name
+        fdata.url = subject
+      } else if( path.extname( v.name ) == ".fsdurl" ){
+        fdata.realname = v.name
+        fdata.name = path.basename( v.name, ".fsdurl" )
+        fdata.isdir = true
+      }
+      diroutput[i] = fdata
+    })
+    if( !dir[0] ) empty = true
+    return { diroutput, readme, empty }
+  } else {
+    var info = {}
+    info.downloadContext = { name: path.basename(url), path: path.join( "/public", config.data.files, url ), size: fsize(fstat.size).human( "jedec" ), date: fstat.mtime.toString() }
+    // info.download = template( fs.readFileSync( __dirname + "/../public/_down.html" ).toString(), info.downloadContext )
+    info.string = config.page[ "no-perview" ]
+    return info
+  }
 }
 
 function render( info, $default, fullurl ){
@@ -55,13 +68,21 @@ function render( info, $default, fullurl ){
     var dirs = [], files = []
     for( let file of info.diroutput ){
       if( file.isdir ){
-        dirs.push( `<a class="directory" href="${file.name}/"><img src="/public/icons/folder.svg" class="file-icon"> ${file.name}</a>` )
+        if( file.realname && path.extname( file.realname) === ".fsdurl" ){
+          dirs.push( `<a class="file" href="${file.realname}/"><img src="/public/icons/folder.svg" class="file-icon" style="margin-bottom: 0px;"> <span style="display: inline-block">${file.name}/ <div class="comment">(${file.realname})</span></div></a>` )
+        } else {
+          dirs.push( `<a class="directory" href="${file.name}/"><img src="/public/icons/folder.svg" class="file-icon"> ${file.name}</a>` )
+        }
       } else {
         var type = mimetype.lookup( file.name, false, "application/" + path.extname( file.name ) )
         if( file.realname && (path.extname( file.realname) == ".fsurl") ){
-          files.push( `<a class="file" href="${file.realname}"><img src="/public/icons/${file.proxy? "cursor": "globe"}.svg" class="file-icon" style="margin-bottom: 0px;"> <span style="display: inline-block">${file.name} <div class="comment">(${file.realname})</span></div></a>` )
+          var urlroot = url.parse( file.url )
+          urlroot = urlroot.protocol + "//" + urlroot.host + "/"
+          files.push( `<a class="file" href="${file.realname}"><img src="/public/icons/${file.proxy? "cursor": "globe"}.svg" class="file-icon" style="margin-bottom: 0px;background-image: url( 'https://api.freejk.com/gongju/favicon/?url=${encodeURIComponent(urlroot)}' );"> <span style="display: inline-block">${file.name} <div class="comment">(${file.realname})</span></div></a>` )
         } else if( type.includes( "image" )){
-          files.push( `<a class="file" href="${file.name}"><img src="/previewer${path.join(fullurl, file.name)}" onerror="this.src = '/public/icons/card-image.svg';this.className = 'file-icon'" class="img-file-icon"> ${file.name}</a>` )
+          files.push( `<a class="file" href="${file.name}"><img src="${ info.imgPreviewer ? info.protocol + path.join( info.imgPreviewer, file.name ) : "/previewer" + path.join(fullurl, file.name)}" onerror="this.src = '/public/icons/card-image.svg';this.className = 'file-icon'" class="img-file-icon"> ${file.name}</a>` )
+        } else if( type.includes( "video" )){
+          files.push( `<a class="file" href="${file.name}"><img src="/public/icons/file-earmark-play.svg" class="file-icon"> ${file.name}</a>` )
         } else if( type.includes( "text" ) ){
           files.push( `<a class="file" href="${file.name}"><img src="/public/icons/file-earmark-code.svg" class="file-icon"> ${file.name}</a>` )
         } else {
@@ -87,6 +108,16 @@ app.register( require( "@fastify/static" ), {
 app.get( "/favicon.ico", ( req, reply ) => {
   reply.redirect( config.page.favicon )
 })
+if( config.data.domain ){
+  app.get( "/sitemap.txt", ( req, reply ) => {
+    var sitemap = []
+    fs.readdirSync( getRealPath( "/" ), {recursive: true} ).forEach(( pathname ) => {
+      sitemap.push( encodeURI(path.join( config.data.domain, pathname )) )
+    })
+    reply.header( "content-type", "text/plain" )
+    reply.send( sitemap.join( "\n" ) )
+  })
+}
 // 为什么不直接加在render里呢，答，render同步(
 app.get( "/previewer/*", async ( req, reply ) => {
   var image = await Jimp.read( getRealPath( decodeURIComponent( req.url ).replace( "/previewer", "" ) ))
@@ -159,7 +190,22 @@ app.get( "/*", async ( req, reply ) => {
       info.download = template( fs.readFileSync( __dirname + "/../public/_down.html" ).toString(), context )
     }
   } else {
-    info = config.page["no-file"]
+    if( fnet.isOnlineDir( realpath ) ){
+      info = await fnet.parsed( realpath )
+      if( info === false ){
+        info = config.page["no-file"]
+        // break
+      }
+      if( typeof info.diroutput === "object" ){
+        info.empty = false
+        info.diroutput = [{
+          name: "..",
+          isdir: true
+        }].concat(info.diroutput)
+      }
+    } else {
+      info = config.page["no-file"]
+    }
   }
   reply.send( template( fs.readFileSync( __dirname + "/../public/_index.html" ).toString(), {
     ...config.page,
@@ -173,10 +219,11 @@ var serverless = async function(req, reply) {
   await app.ready()
   app.server.emit( "request", req, reply )
 }
-
-serverless.start = function( port = (process.env.PORT || 3000) ){
+serverless.c = config
+serverless.start = function( port = (process.env.PORT || 3000), callback = () => void 0 ){
   app.listen({port}, () => {
     console.log( "Server already listen on port " + port )
+    callback( app )
   })
 }
 
