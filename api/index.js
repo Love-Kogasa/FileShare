@@ -137,9 +137,9 @@ app.get( "/variable.js", ( req, reply ) => {
   reply.header( "content-type", "text/javascript" )
   reply.send( template( fs.readFileSync( __dirname + "/../public/_variable.js" ).toString(), {data: JSON.stringify(config.data)} ) )
 })
-app.get( "/files/*", ( req, reply ) => {
+app.get( "/fileApi/*", ( req, reply ) => {
   reply.header( "content-type", "application/json" )
-  var output = getPath( decodeURIComponent(req.url.replace( "/files", "" )))
+  var output = getPath( decodeURIComponent(req.url.replace( "/fileApi", "" )))
   reply.send(JSON.stringify(output))
 })
 app.get( "/proxy/*", ( req, reply ) => {

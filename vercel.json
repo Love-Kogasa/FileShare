@@ -5,8 +5,8 @@
       "destination": "/api"
     },
     {
-      "source": "/public/(.*)",
-      "destination": "/public"
+      "source": "/files/(.*)",
+      "destination": "/api"
     }
   ]
 }
