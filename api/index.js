@@ -36,8 +36,6 @@ function getPath( url ){
     var diroutput = [], readme = "", empty
     dir.forEach(( v, i ) => {
       var fdata = {name: v.name, isdir: v.isDirectory(), realsize: v.size, size: fsize(v.size).human( "jedec" )}
-      if( v.name.toLowerCase() == "readme.md" )
-        readme = fs.readFileSync( path.join( filePath, v.name ) ).toString()
       if( path.extname( v.name ) == ".fsurl" ){
         var {subject, proxy} = fnet.parse(fs.readFileSync( path.join( filePath, v.name)).toString())
         fdata.name = path.basename(subject)
@@ -48,6 +46,13 @@ function getPath( url ){
         fdata.realname = v.name
         fdata.name = path.basename( v.name, ".fsdurl" )
         fdata.isdir = true
+      }
+      if( !readme && fdata.name.toLowerCase() == config.data.readme ){
+        if( fdata.realname ){
+          readme = async () => await (await fetch(fnet.parse( fs.readFileSync(path.join( filePath, v.name)).toString()).subject)).text()
+        } else {
+          readme = fs.readFileSync( path.join( filePath, v.name ) ).toString()
+        }
       }
       diroutput[i] = fdata
     })
@@ -210,7 +215,12 @@ app.get( "/*", async ( req, reply ) => {
   reply.send( template( fs.readFileSync( __dirname + "/../public/_index.html" ).toString(), {
     ...config.page,
     path : pathmini(url),
-    "no-readme": (info.readme ? md.render(info.readme) : (info.download || md.render(config.page[ "no-readme" ]))),
+    "no-readme": (
+      (info.readme && typeof info.readme) == "string" ?
+        md.render(info.readme) :
+        typeof info.readme == "function" ?
+          md.render( await info.readme() ) : (info.download || md.render(config.page[ "no-readme" ]))
+      ),
     "empty-folder": render( info, config.page[ "empty-folder" ], url )
   }))
 })
