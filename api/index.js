@@ -150,7 +150,7 @@ app.get( "/fileApi/*", ( req, reply ) => {
 app.get( "/proxy/*", ( req, reply ) => {
   var url = decodeURIComponent(req.url.replace( "/proxy", "" ))
   try {
-    fnet.handle( getRealPath( url ).replace( path.extname( url ), "" ), "/proxy", req, reply )
+    fnet.handle( getRealPath( url ), "/proxy", req, reply )
   } catch(err){
     reply.code( 500 )
     reply.send( "这里发生了一个服务端错误" )
@@ -173,7 +173,7 @@ app.get( "/*", async ( req, reply ) => {
       }
     } else {
       info = {}
-      var context = { name: path.basename(url), path: path.join( path.join( "/public", config.data.files ), req.url ), size: fsize(fstat.size).human( "jedec" ), date: fstat.mtime.toString() }
+      var context = { name: path.basename(url), path: path.join( "/public", config.data.files, req.url ), size: fsize(fstat.size).human( "jedec" ), date: fstat.mtime.toString() }
       var type = mimetype.lookup( url, false, "application/" + path.extname( url ) )
       if( type.includes( "text" ) ){
         info.toString = () => `File Preview(文件预览)<pre><code class="language-${mimetype.lookup( url, false, "application/" + path.extname( url ) ).split( "/" )[0]}">${fs.readFileSync( realpath ).toString()}</code></pre>`
@@ -185,7 +185,7 @@ app.get( "/*", async ( req, reply ) => {
         context.size = "Unknown Size"
         context.name = path.basename(subject)
         if( proxy ){
-          context.path = path.join( "/proxy", url + path.extname( subject ) )
+          context.path = path.join( "/proxy", url )
         } else {
           context.path = subject
         }
@@ -196,7 +196,7 @@ app.get( "/*", async ( req, reply ) => {
     }
   } else {
     if( fnet.isOnlineDir( realpath ) ){
-      info = await fnet.parsed( realpath )
+      info = await fnet.parsed( realpath, req.url )
       if( info === false ){
         info = config.page["no-file"]
         // break

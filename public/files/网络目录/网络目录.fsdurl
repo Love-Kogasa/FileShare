@@ -1,3 +1,4 @@
 [config]
 type    =   v-fileshare # 接口类型
 for =   https://fileshare.lapis-net.top/fileApi/文件夹/Hello # v-fileshare 文件API，即本项目的内置API
+proxy   =   1

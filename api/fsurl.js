@@ -37,12 +37,17 @@ function parse( code ){
   return request
 }
 
-async function handle( codePath, route, req, reply ){
-  if( fs.existsSync( codePath )){
-    var {subject, option, proxy} = parse( fs.readFileSync( codePath ).toString() )
-    if( !proxy ){
-      reply.redirect( subject )
-      return; }
+async function handle( codePath, route, req, reply, actually ){
+  if( actually || fs.existsSync( codePath ) ){
+    if( typeof actually !== "string" ){
+      var {subject, option, proxy} = parse( fs.readFileSync( codePath ).toString() )
+      if( !proxy ){
+        reply.redirect( subject )
+        return; }
+    } else {
+      var subject = actually
+      var option = option
+    }
     var response = (await fetch( subject, option ))
     if( response.status > 400 ){
       reply.send( "Cannot Proxy " + subject )
@@ -57,6 +62,14 @@ async function handle( codePath, route, req, reply ){
       await read()
     }
     reply.raw.end()
+  } else if( isOnlineDir( codePath ) ){
+    console.log(codePath)
+    var file = await parsed( codePath, req.url )
+    if( file.proxy && file.downloadContext.source ){
+      handle( null, route, req, reply, file.downloadContext.source )
+    } else {
+      reply.redirect( path.dirname( req.url.replace( route, "" ) ) )
+    }
   } else {
     reply.redirect( path.dirname( req.url.replace( route, "" ) ) )
   }
@@ -66,7 +79,7 @@ async function handle( codePath, route, req, reply ){
 var dirSupportType = [
   "v-fileshare"
 ]
-async function parsed( requestPath ){
+async function parsed( requestPath, requestUrl ){
   var pathdt = getDPath(requestPath)
   if( !pathdt ){
     console.error( new TypeError( "路径错误，可能是文件不存在" ) )
@@ -86,10 +99,15 @@ async function parsed( requestPath ){
       json.protocol = urlObject.protocol + "//"
       json.imgPreviewer = path.join( urlObject.host, "previewer", pathdt.vpath )
       if( json.string ){
+        json.proxy = config.proxy || false
         // 处理文件
         var subjectConfig = await (await fetch( json.protocol + path.join( urlObject.host, "config" ) )).json()
         json.toString = () => json.string
         json.downloadContext.path = json.protocol + path.join( urlObject.host, json.downloadContext.path )
+        if( parseInt( json.proxy)){
+          json.downloadContext.source = json.downloadContext.path
+          json.downloadContext.path = path.join( "/proxy", requestUrl )
+        }
         json.download = template( fs.readFileSync( __dirname + "/../public/_down.html" ).toString(), json.downloadContext || {})
       }
       return json

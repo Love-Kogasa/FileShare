@@ -1,0 +1,4 @@
+[config]
+type    =   v-fileshare # 接口类型
+for =   http://127.0.0.1:3000/fileApi/文件夹 # v-fileshare 文件API，即本项目的内置API
+proxy   =   1
