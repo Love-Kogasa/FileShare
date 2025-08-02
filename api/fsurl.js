@@ -3,6 +3,7 @@ const url = require( "url" )
 const path = require( "path" )
 const fs = require( "fs" )
 const template = require( "template-string" )
+const fsize = require( "file-size" )
 
 // 网络文件
 function parse( code ){
@@ -77,7 +78,7 @@ async function handle( codePath, route, req, reply, actually ){
 
 // 网络目录
 var dirSupportType = [
-  "v-fileshare"
+  "v-fileshare", "static"
 ]
 async function parsed( requestPath, requestUrl ){
   var pathdt = getDPath(requestPath)
@@ -111,6 +112,40 @@ async function parsed( requestPath, requestUrl ){
         json.download = template( fs.readFileSync( __dirname + "/../public/_down.html" ).toString(), json.downloadContext || {})
       }
       return json
+    },
+    "static": async function( config ) {
+      // Directory
+      var selfConfig = ini.parse( fs.readFileSync( __dirname + "/../config.ini" ).toString() )
+      if( (config[ "for" ] + pathdt.vpath).slice( -1 ) === "/" ) {
+        var dirc = (await (await fetch( config[ "for" ] + path.join( pathdt.vpath, "directoryc" ))).text()).split( "\n" )
+        var diroutput = [], readme = "", empty
+        for( let file of dirc ){
+          if( file.trim()[0] === "#" ) continue
+          var [fileName, size] = file.split( ":" )
+          var fileData = {name: fileName, isdir: false, realsize: size ? parseInt( size ) : "unknown", size: size ?fsize(parseInt( size )).human( "jedec" ) : "unknown" }
+          if( fileName.slice( -1 ) === "/" ){
+            fileData.isdir = true
+            fileData.name = fileName.slice( 0, -1 )
+          }
+          diroutput.push( fileData )
+          if( !readme && fileName.toLowerCase() == selfConfig.data.readme.toLowerCase() ){
+            readme = await (await fetch( config[ "for" ] + fileName )).text()
+          }
+        }
+        return {diroutput, readme, empty}
+      // File
+      } else {
+        var file = {}
+        file.download = template( fs.readFileSync( __dirname + "/../public/_down.html" ).toString(), {
+          source: config.proxy ? config[ "for" ] : void 0,
+          path: config.proxy ? path.join( "/proxy", requestUrl ) : config[ "for" ],
+          size: "Unknown size",
+          name: path.basename( requestUrl )
+        })
+        console.log(selfConfig.page[ "no-preview" ])
+        file.toString = () => selfConfig.page[ "no-preview" ]
+        return file
+      }
     }
   }
   return await handles[config.type](config)

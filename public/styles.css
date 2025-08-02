@@ -1,5 +1,9 @@
 @import "/variable.css";
 
+* {
+  transition : all 0.5s ease;
+}
+
 body {
   background-color: var(--background-color);
   background-image: var(--background-image);
@@ -16,7 +20,7 @@ body {
   position: fixed;
   top: 0px; left: 0px;
   width: 100vw;
-  z-index: 999;
+  z-index: 9999;
   padding: 0.7ch;
   font-size: 115%;
   padding-left: 2em;
@@ -24,6 +28,58 @@ body {
   overflow-x: auto;
   color: var(--bar-font-color);
   box-shadow: 0px 0px 1em var(--bar-shadow);
+}
+
+.footer {
+  color: var(--bar-font-color);
+  background-color: var(--bar-color);
+  position: fixed;
+  bottom: 0px; left: 0px;
+  padding: 0.7ch;
+  padding-left: 2em;
+  padding-right: 2em;
+  border-top-right-radius: 1em;
+  z-index: 9999;
+}
+
+.menu {
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--menu-color);
+  /*box-shadow: 0px 0px 1em var(--bar-shadow);*/
+  z-index: 9998;
+  position: fixed;
+  top: 0px; right: 0px;
+  border-radius: 1.5em;
+  width: 0px;
+}
+
+.menu > .container {
+  margin-top: 7ch;
+  transform: translateX( -1.5em );
+}
+
+.menu-open {
+  width: 3em;
+}
+
+.link-icon {
+  height: 1em;
+  padding-right: 0.5em;
+  margin-bottom: -0.1em;
+}
+
+now::-webkit-scrollbar, .nav-title::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-title {
+  display: inline-block;
+  overflow-x: auto;
+  max-width: 54vw;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .icon {
@@ -65,6 +121,8 @@ now {
   padding-right: 1em;
   overflow-x: auto;
   white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .directory {
@@ -145,7 +203,7 @@ a {
     margin-top: 1em;
     /*writing-mode: vertical-lr;
     text-orientation: upright;*/
-    overflow-y: auto;
+    overflow-x: auto;
     height: 70vh;
   }
   #win-files, #win-readme {

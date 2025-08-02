@@ -10,4 +10,5 @@
   --board-color: ${board-background-color};
   --board-text-color: ${board-text-color};
   --comment-color: ${comment-color};
+  --menu-color: ${menu-color};
 }

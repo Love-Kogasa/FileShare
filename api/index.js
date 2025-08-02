@@ -62,7 +62,7 @@ function getPath( url ){
     var info = {}
     info.downloadContext = { name: path.basename(url), path: path.join( "/public", config.data.files, url ), size: fsize(fstat.size).human( "jedec" ), date: fstat.mtime.toString() }
     // info.download = template( fs.readFileSync( __dirname + "/../public/_down.html" ).toString(), info.downloadContext )
-    info.string = config.page[ "no-perview" ]
+    info.string = config.page[ "no-preview" ]
     return info
   }
 }
@@ -158,6 +158,7 @@ app.get( "/proxy/*", ( req, reply ) => {
 })
 app.get( "/*", async ( req, reply ) => {
   var md = require( "markdown-it" )()
+  var urlm = require( "url" )
   var url = decodeURIComponent( req.url )
   reply.header( "content-type", "text/html" )
   var info = "", realpath = getRealPath( url ), fstat
@@ -190,7 +191,7 @@ app.get( "/*", async ( req, reply ) => {
           context.path = subject
         }
       } else {
-        info.toString = () => config.page["no-perview"]
+        info.toString = () => config.page["no-preview"]
       }
       info.download = template( fs.readFileSync( __dirname + "/../public/_down.html" ).toString(), context )
     }
@@ -212,6 +213,20 @@ app.get( "/*", async ( req, reply ) => {
       info = config.page["no-file"]
     }
   }
+  var linksRender = ""
+  for( let line in config.footer ){
+    var link = config.footer[line]
+    var urlroot = urlm.parse( link )
+    urlroot = urlroot.protocol + "//" + urlroot.host + "/"
+    linksRender += `<a href=${link}><img src="https://api.freejk.com/gongju/favicon/?url=${encodeURIComponent(urlroot)}" class="link-icon" alt="${line}"></a>`
+  }
+  var menuRender = ""
+  for( let line in config.menu ){
+    var link = config.menu[line]
+    var urlroot = urlm.parse( link )
+    urlroot = urlroot.protocol + "//" + urlroot.host + "/"
+    menuRender += `<div style="margin-top: 0.7ch;"><a href=${link}><img src="https://api.freejk.com/gongju/favicon/?url=${encodeURIComponent(urlroot)}" class="icon" alt="${line}"></a></div>`
+  }
   reply.send( template( fs.readFileSync( __dirname + "/../public/_index.html" ).toString(), {
     ...config.page,
     path : pathmini(url),
@@ -221,7 +236,9 @@ app.get( "/*", async ( req, reply ) => {
         typeof info.readme == "function" ?
           md.render( await info.readme() ) : (info.download || md.render(config.page[ "no-readme" ]))
       ),
-    "empty-folder": render( info, config.page[ "empty-folder" ], url )
+    "empty-folder": render( info, config.page[ "empty-folder" ], url ),
+    "links-render": linksRender,
+    "menu-render": menuRender
   }))
 })
 

@@ -1,0 +1,4 @@
+[config]
+type    =   static # 接口类型
+for =   http://127.0.0.1:8080/v-fileshare-static/ # 静态API
+proxy   =   0

@@ -12,13 +12,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/${hightlight-theme}.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/go.min.js"></script>
+    
+    <!-- 访问量统计 -->
+    <script async src="https://finicounter.eu.org/finicounter.js"></script>
 
     <link rel="stylesheet" href="/public/styles.css">
   </head>
   <body>
-    <div class="navbar" onclick="(window.location.href = '/')">
+    <div class="navbar">
       <img src="${avatar}" class="icon">
-      <span style="max-width: 70vw; overflow: auto;">${title}</span>
+      <span class="nav-title" onclick="(window.location.href = '/')">${title}</span>
+      <span style="float: right; padding-right: 15vw;" onclick="menu.classList.toggle( 'menu-open')"><img src="/public/icons/list.svg" class="icon"></span>
+    </div>
+    <div class="menu" id="menu">
+      <div class="container">
+        <div><a href="/"><img src="${favicon}" class="icon"></a></div>
+        ${menu-render}
+      </div>
     </div>
     <div class="container">
       <div id="win-des">
@@ -37,6 +47,10 @@
           ${no-readme}
         </board>
       </div>
+    </div>
+    <div class="footer">
+      ${links-render}
+      本页已经被看了: <span id="finicount_views">${default-visitor-number}</span> 次啦
     </div>
     <script>hljs.highlightAll()</script>
   </body>
