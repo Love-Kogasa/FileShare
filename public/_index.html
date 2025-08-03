@@ -15,14 +15,14 @@
     
     <!-- 访问量统计 -->
     <script async src="https://finicounter.eu.org/finicounter.js"></script>
-
+    
     <link rel="stylesheet" href="/public/styles.css">
   </head>
   <body>
     <div class="navbar">
       <img src="${avatar}" class="icon">
       <span class="nav-title" onclick="(window.location.href = '/')">${title}</span>
-      <span style="float: right; padding-right: 15vw;" onclick="menu.classList.toggle( 'menu-open')"><img src="/public/icons/list.svg" class="icon"></span>
+      <span id="menu-btn" onclick="menu.classList.toggle( 'menu-open')"><img src="/public/icons/list.svg" class="icon"></span>
     </div>
     <div class="menu" id="menu">
       <div class="container">
@@ -48,6 +48,11 @@
         </board>
       </div>
     </div>
+    <div id="sakana-widget">
+      <!-- https://github.com/dsrkafuu/sakana-widget/ -->
+    </div>
+    <!-- Sakana Widget -->
+    ${sakana-widget-render}
     <div class="footer">
       ${links-render}
       本页已经被看了: <span id="finicount_views">${default-visitor-number}</span> 次啦

@@ -7,6 +7,7 @@
   --font-color: ${font-color};
   --background-image: ${background-image};
   --bar-color-alpha: ${bar-color-alpha};
+  --bar-font-color-alpha: ${bar-font-color-alpha};
   --board-color: ${board-background-color};
   --board-text-color: ${board-text-color};
   --comment-color: ${comment-color};

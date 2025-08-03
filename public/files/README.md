@@ -1,13 +1,17 @@
-## 项目施工中 🚧
-* 基本的文件系统 ✓
-* 手机UI ✓
-* 文件下载 ✓
-* 文本文件预览(基于MimeType) ✓
-* 自定义 ？(存疑)
-* 图片预览(含缩略图) ✓
-* 从URL下载文件 ✓
-* 代理下载 ✓
-* 电脑端UI ✓
-* SiteMap生成 ✓
-* 静态页面生成 ×
-* 等上面写完了再列()
+## V-FileShare
+从 Github 克隆仓库并部署
+```bash
+git clone https://github.com/Love-Kogasa/FileShare
+cd FileShare
+rm -rf .git && vercel --prod
+```
+
+创建您的第一个文件并提交
+```bash
+echo "Hello World" > public/files/test.txt
+vercel --prod
+```
+
+前往Github star此项目  
+https://github.com/Love-Kogasa/FileShare  
+感谢您的支持(◦˙▽˙◦)

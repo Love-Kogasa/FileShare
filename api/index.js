@@ -83,7 +83,7 @@ function render( info, $default, fullurl ){
         if( file.realname && (path.extname( file.realname) == ".fsurl") ){
           var urlroot = url.parse( file.url )
           urlroot = urlroot.protocol + "//" + urlroot.host + "/"
-          files.push( `<a class="file" href="${file.realname}"><img src="/public/icons/${file.proxy? "cursor": "globe"}.svg" class="file-icon" style="margin-bottom: 0px;background-image: url( 'https://api.freejk.com/gongju/favicon/?url=${encodeURIComponent(urlroot)}' );"> <span style="display: inline-block">${file.name} <div class="comment">(${file.realname})</span></div></a>` )
+          files.push( `<a class="file" href="${file.realname}"><img src="/public/icons/${file.proxy? "cursor": "globe"}.svg" class="file-icon" style="margin-bottom: 0px;background-image: url( 'https://www.favicon.vip/get.php?url=${encodeURIComponent(urlroot)}' );"> <span style="display: inline-block">${file.name} <div class="comment">(${file.realname})</span></div></a>` )
         } else if( type.includes( "image" )){
           files.push( `<a class="file" href="${file.name}"><img src="${ info.imgPreviewer ? info.protocol + path.join( info.imgPreviewer, file.name ) : "/previewer" + path.join(fullurl, file.name)}" onerror="this.src = '/public/icons/card-image.svg';this.className = 'file-icon'" class="img-file-icon"> ${file.name}</a>` )
         } else if( type.includes( "video" )){
@@ -218,14 +218,27 @@ app.get( "/*", async ( req, reply ) => {
     var link = config.footer[line]
     var urlroot = urlm.parse( link )
     urlroot = urlroot.protocol + "//" + urlroot.host + "/"
-    linksRender += `<a href=${link}><img src="https://api.freejk.com/gongju/favicon/?url=${encodeURIComponent(urlroot)}" class="link-icon" alt="${line}"></a>`
+    linksRender += `<a href=${link}><img src="https://www.favicon.vip/get.php?url=${encodeURIComponent(urlroot)}" class="link-icon" alt="${line}"></a>`
   }
   var menuRender = ""
   for( let line in config.menu ){
     var link = config.menu[line]
     var urlroot = urlm.parse( link )
     urlroot = urlroot.protocol + "//" + urlroot.host + "/"
-    menuRender += `<div style="margin-top: 0.7ch;"><a href=${link}><img src="https://api.freejk.com/gongju/favicon/?url=${encodeURIComponent(urlroot)}" class="icon" alt="${line}"></a></div>`
+    menuRender += `<div style="margin-top: 0.7ch;"><a href=${link}><img src="https://www.favicon.vip/get.php?url=${encodeURIComponent(urlroot)}" class="icon" alt="${line}"></a></div>`
+  }
+  var sakanaWidgetRender = ""
+  if( parseInt(config[ "sakana-widget" ].enable) ){
+    var customCharacter = ( img ) => `const custom = SakanaWidget.getCharacter( "chisato" )
+    custom.image = ${JSON.stringify( img )}
+    SakanaWidget.registerCharacter( "custom", custom" )`
+    sakanaWidgetRender = `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sakana-widget@2.7.1/lib/sakana.min.css" />
+    <script>
+    function initSakanaWidget(){
+      ${ config[ "sakana-widget" ].img ? customCharacter( config[ "sakana-widget" ].img ) : "" }
+      new SakanaWidget({ character : ${JSON.stringify( config[ "sakana-widget" ].character)}}).mount( "#sakana-widget" )
+    } </script>
+    <script async onload="initSakanaWidget()" src="https://cdn.jsdelivr.net/npm/sakana-widget@2.7.1/lib/sakana.min.js"></script>`
   }
   reply.send( template( fs.readFileSync( __dirname + "/../public/_index.html" ).toString(), {
     ...config.page,
@@ -238,7 +251,8 @@ app.get( "/*", async ( req, reply ) => {
       ),
     "empty-folder": render( info, config.page[ "empty-folder" ], url ),
     "links-render": linksRender,
-    "menu-render": menuRender
+    "menu-render": menuRender,
+    "sakana-widget-render": sakanaWidgetRender
   }))
 })
 
