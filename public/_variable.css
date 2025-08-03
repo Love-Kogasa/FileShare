@@ -12,4 +12,6 @@
   --board-text-color: ${board-text-color};
   --comment-color: ${comment-color};
   --menu-color: ${menu-color};
+  --link-color: ${link-color};
+  --link-visited-color: ${link-visited-color};
 }

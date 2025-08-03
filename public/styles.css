@@ -169,6 +169,11 @@ now {
 
 a {
   text-decoration: none;
+  color: var(--link-color);
+}
+
+a:visited {
+  color: var(--link-visited-color);
 }
 
 .button {

@@ -61,6 +61,8 @@ board-background-color  =   \#FFFFFF99 # 展示板背景色
 board-text-color    =   \#000 # 展示栏文字颜色
 comment-color   =   \#CCC # 文件名注释颜色
 menu-color   =   \#C8B6FF # 菜单(导航侧栏)颜色
+link-color  =   \#000 # 链接颜色
+link-visited-color  =   \#000 # 链接访问过显示的颜色
 
 [footer]
 ; 底栏图标列表，添加格式 label = url，建议弄1-3个
