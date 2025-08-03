@@ -104,14 +104,64 @@ Vercel不适合存储超大文件，详见Vercel相关限制 https://vercel.com/
 如果你已经注册好Vercel账户和Github账户，那么您可以直接点击以下链接部署您的项目
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Love-Kogasa/FileShare)
 
-## 借物表
-(候补)
+## 网络文件
+V-FileShare 支持网络文件  
+您可以创建一个.fsurl代表一个网络文件  
+For Example
+```
+https://fileshare.lapis-net.top/public/files/404.jpg
+```
+V-FileShare 还支持文件转发
+```
+@https://fileshare.lapis-net.top/public/files/404.jpg
+```
+这条链接表示使用代理下载文件
+V-FileShare 也支持一些其他的配置项
+```ini
+[subject]
+url =   https://example.com/ # 从何处转发请求
+method  =   GET # 请求方式
+json    =   1 # 是否编码成json，如果是请求头中的content-type会自动被设置为application/json
+
+[headers]
+content-type    =   text/json
+xxx =   xxx
+
+[body]
+xxx =   xxx # 如果启用json则将body中的内容编码成json，否则使用subject中的body作为请求主题
+```
 
 ## 网络目录
-(候补)
+V-FileShare 支持网络目录！  
+在 V-FileShare 中，您可以使用一个.fsdurl代表一个网络目录
+```ini
+[config]
+type    =   v-fileshare # 接口类型，支持v-fileshare和static
+for =   https://fileshare.lapis-net.top/fileApi/文件夹/Hello # 网络目录目标
+proxy   =   1 # 是否启用代理(0/1)
+```
 ### V-FileShare API
-(候补)
+V-FileShare API即本项目内置的API，任何人都有权访问(可以访问API目录≠可以下载文件)，API目录在/fileApi目录下  
+For Example 访问home目录: /fileApi/home/  
 ### Static
+一种允许加载静态文件目录的接口类型  
+它允许您从任意静态网站托管服务(如Github Page)中获取文件  
+这样可以防止您的vercel上的部署超出hobby计划所提供的磁盘大小  
+您只需要在静态文件目录下添加一个名为 *directoryc* 的文本，并列出该目录下所有的可读文件  
+For Example
+```
+# 文件:大小
+directory/
+README.md
+file.txt
+file2.txt:114514
+```
+您可以用ls命令快速生成一个列表
+```bash
+ls -1 > directoryc
+```
+
+## 借物表
 (候补)
 
 ## 对于啥也不会的小白
@@ -119,5 +169,3 @@ Vercel不适合存储超大文件，详见Vercel相关限制 https://vercel.com/
 ### 几种免费域名的获取渠道
 (候补)
 
-## 页面开发
-(候补)

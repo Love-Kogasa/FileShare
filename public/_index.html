@@ -13,9 +13,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/go.min.js"></script>
     
-    <!-- 访问量统计 -->
-    <script async src="https://finicounter.eu.org/finicounter.js"></script>
-    
     <link rel="stylesheet" href="/public/styles.css">
   </head>
   <body>
@@ -51,12 +48,12 @@
     <div id="sakana-widget">
       <!-- https://github.com/dsrkafuu/sakana-widget/ -->
     </div>
-    <!-- Sakana Widget -->
     ${sakana-widget-render}
     <div class="footer">
       ${links-render}
       本页已经被看了: <span id="finicount_views">${default-visitor-number}</span> 次啦
     </div>
+    <script async src="https://finicounter.eu.org/finicounter.js"></script>
     <script>hljs.highlightAll()</script>
   </body>
 </html>
