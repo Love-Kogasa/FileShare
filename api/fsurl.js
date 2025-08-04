@@ -5,6 +5,8 @@ const fs = require( "fs" )
 const template = require( "template-string" )
 const fsize = require( "file-size" )
 
+var {config: selfConfig} = require( "./config" )
+
 // 网络文件
 function parse( code ){
   var request = { description: "网络文件", proxy: false, option: {} }
@@ -115,7 +117,6 @@ async function parsed( requestPath, requestUrl ){
     },
     "static": async function( config ) {
       // Directory
-      var selfConfig = ini.parse( fs.readFileSync( __dirname + "/../config.ini" ).toString() )
       if( (config[ "for" ] + pathdt.vpath).slice( -1 ) === "/" ) {
         var dirc = (await (await fetch( config[ "for" ] + path.join( pathdt.vpath, "directoryc" ))).text()).split( "\n" )
         var diroutput = [], readme = "", empty
@@ -142,7 +143,6 @@ async function parsed( requestPath, requestUrl ){
           size: "Unknown size",
           name: path.basename( requestUrl )
         })
-        console.log(selfConfig.page[ "no-preview" ])
         file.toString = () => selfConfig.page[ "no-preview" ]
         return file
       }

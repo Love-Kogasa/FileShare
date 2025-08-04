@@ -5,157 +5,29 @@ const template = require( "template-string" )
 const path = require( "path" )
 const mimetype = require( "mimetype" )
 const fsize = require( "file-size" )
-const {Jimp} = require( "jimp" )
 const fnet = require( "./fsurl" )
 const url = require( "url" )
 
-// 针对vercel执行路径问题
-var config = ini.parse( fs.readFileSync( __dirname + "/../config.ini" ).toString() )
-
-function pathmini( url ){
-  if( url.split( "/" ).length <= 3 ) return url
-  var urllist = []
-  for( let part of path.dirname(url).split( "/" ) ){
-    urllist.push( part[0])
-  }
-  return urllist.concat( path.basename( url ) ).join( "/" )
-}
-
-function getRealURL( url ){
-  return path.join( "/public", path.join(config.data.files, url))
-}
-
-function getRealPath( url ){
-  return path.join( __dirname + "/../public", path.join(config.data.files, url))
-}
-
-function getPath( url ){
-  var filePath = getRealPath( url ), fstat = fs.statSync( filePath )
-  if( fstat.isDirectory() ){
-    var dir = fs.readdirSync(filePath, { withFileTypes:true })
-    var diroutput = [], readme = "", empty
-    dir.forEach(( v, i ) => {
-      var fdata = {name: v.name, isdir: v.isDirectory(), realsize: v.size, size: fsize(v.size).human( "jedec" )}
-      if( path.extname( v.name ) == ".fsurl" ){
-        var {subject, proxy} = fnet.parse(fs.readFileSync( path.join( filePath, v.name)).toString())
-        fdata.name = path.basename(subject)
-        fdata.proxy = proxy
-        fdata.realname = v.name
-        fdata.url = subject
-      } else if( path.extname( v.name ) == ".fsdurl" ){
-        fdata.realname = v.name
-        fdata.name = path.basename( v.name, ".fsdurl" )
-        fdata.isdir = true
-      }
-      if( !readme && fdata.name.toLowerCase() == config.data.readme ){
-        if( fdata.realname ){
-          readme = async () => await (await fetch(fnet.parse( fs.readFileSync(path.join( filePath, v.name)).toString()).subject)).text()
-        } else {
-          readme = fs.readFileSync( path.join( filePath, v.name ) ).toString()
-        }
-      }
-      diroutput[i] = fdata
-    })
-    if( !dir[0] ) empty = true
-    return { diroutput, readme, empty }
-  } else {
-    var info = {}
-    info.downloadContext = { name: path.basename(url), path: path.join( "/public", config.data.files, url ), size: fsize(fstat.size).human( "jedec" ), date: fstat.mtime.toString() }
-    // info.download = template( fs.readFileSync( __dirname + "/../public/_down.html" ).toString(), info.downloadContext )
-    info.string = config.page[ "no-preview" ]
-    return info
-  }
-}
-
-function render( info, $default, fullurl ){
-  var out = ""
-  if( Array.isArray( info.diroutput ) && info.empty !== true ){
-    var dirs = [], files = []
-    for( let file of info.diroutput ){
-      if( file.isdir ){
-        if( file.realname && path.extname( file.realname) === ".fsdurl" ){
-          dirs.push( `<a class="file" href="${file.realname}/"><img src="/public/icons/folder.svg" class="file-icon" style="margin-bottom: 0px;"> <span style="display: inline-block">${file.name}/ <div class="comment">(${file.realname})</span></div></a>` )
-        } else {
-          dirs.push( `<a class="directory" href="${file.name}/"><img src="/public/icons/folder.svg" class="file-icon"> ${file.name}</a>` )
-        }
-      } else {
-        var type = mimetype.lookup( file.name, false, "application/" + path.extname( file.name ) )
-        if( file.realname && (path.extname( file.realname) == ".fsurl") ){
-          var urlroot = url.parse( file.url )
-          urlroot = urlroot.protocol + "//" + urlroot.host + "/"
-          files.push( `<a class="file" href="${file.realname}"><img src="/public/icons/${file.proxy? "cursor": "globe"}.svg" class="file-icon" style="margin-bottom: 0px;background-image: url( 'https://www.favicon.vip/get.php?url=${encodeURIComponent(urlroot)}' );"> <span style="display: inline-block">${file.name} <div class="comment">(${file.realname})</span></div></a>` )
-        } else if( type.includes( "image" )){
-          files.push( `<a class="file" href="${file.name}"><img src="${ info.imgPreviewer ? info.protocol + path.join( info.imgPreviewer, file.name ) : "/previewer" + path.join(fullurl, file.name)}" onerror="this.src = '/public/icons/card-image.svg';this.className = 'file-icon'" class="img-file-icon"> ${file.name}</a>` )
-        } else if( type.includes( "video" )){
-          files.push( `<a class="file" href="${file.name}"><img src="/public/icons/file-earmark-play.svg" class="file-icon"> ${file.name}</a>` )
-        } else if( type.includes( "text" ) ){
-          files.push( `<a class="file" href="${file.name}"><img src="/public/icons/file-earmark-code.svg" class="file-icon"> ${file.name}</a>` )
-        } else {
-          files.push( `<a class="file" href="${file.name}"><img src="/public/icons/file-earmark.svg" class="file-icon"> ${file.name}</a>` )
-        }
-      }
-    }
-    out += dirs.join( "" )
-    out += files.join( "" )
-  }
-  if( info.empty )
-    out = $default
-  if( !out )
-    out = info.toString()
-  return out
-}
+var {config, getRealURL, getRealPath, pathmini} = require( "./config" )
+var {getPathData: getPath, renderFileList: render} = require( "./api" )
 
 var app = fastify({ logger: true })
-app.register( require( "@fastify/static" ), {
+app.register(require( "@fastify/static" ), {
   root: __dirname + "/../public/",
   prefix: "/public/"
 })
-app.get( "/favicon.ico", ( req, reply ) => {
-  reply.redirect( config.page.favicon )
-})
-if( config.data.domain ){
-  app.get( "/sitemap.txt", ( req, reply ) => {
-    var sitemap = []
-    fs.readdirSync( getRealPath( "/" ), {recursive: true} ).forEach(( pathname ) => {
-      sitemap.push( encodeURI(path.join( config.data.domain, pathname )) )
-    })
-    reply.header( "content-type", "text/plain" )
-    reply.send( sitemap.join( "\n" ) )
-  })
-}
-// 为什么不直接加在render里呢，答，render同步(
-app.get( "/previewer/*", async ( req, reply ) => {
-  var image = await Jimp.read( getRealPath( decodeURIComponent( req.url ).replace( "/previewer", "" ) ))
-  image.resize( { w: 64, h: 64 } )
-  reply.header( "content-type", "image/png")
-  reply.send((await image.getBuffer( "image/png" )))
-})
-app.get( "/config", ( req, reply ) => {
-  reply.header( "content-type", "application/json" )
-  reply.send( config )
-})
+
+app.get("/favicon.ico", ( req, reply ) => { reply.redirect( config.page.favicon ) })
+if( config.data.domain ) app.get("/sitemap.txt", require("./routes/sitemap"))
+app.get("/previewer/*", require("./routes/previewer"))
+app.get("/config", require("./routes/config"))
+app.get("/proxy/*", require("./routes/proxy"))
+app.get("/fileApi/*", require("./routes/fileApi"))
 app.get( "/variable.css", ( req, reply ) => {
   reply.header( "content-type", "text/css" )
   reply.send( template( fs.readFileSync( __dirname + "/../public/_variable.css" ).toString(), config.page ) )
 })
-app.get( "/variable.js", ( req, reply ) => {
-  reply.header( "content-type", "text/javascript" )
-  reply.send( template( fs.readFileSync( __dirname + "/../public/_variable.js" ).toString(), {data: JSON.stringify(config.data)} ) )
-})
-app.get( "/fileApi/*", ( req, reply ) => {
-  reply.header( "content-type", "application/json" )
-  var output = getPath( decodeURIComponent(req.url.replace( "/fileApi", "" )))
-  reply.send(JSON.stringify(output))
-})
-app.get( "/proxy/*", ( req, reply ) => {
-  var url = decodeURIComponent(req.url.replace( "/proxy", "" ))
-  try {
-    fnet.handle( getRealPath( url ), "/proxy", req, reply )
-  } catch(err){
-    reply.code( 500 )
-    reply.send( "这里发生了一个服务端错误" )
-  }
-})
+
 app.get( "/*", async ( req, reply ) => {
   var md = require( "markdown-it" )()
   var urlm = require( "url" )

@@ -1,6 +1,7 @@
 项目施工中！  
 当前版本为 1.0-beta 版本，可能存在较多错误  
 ## V-FileShare
+[中文](https://github.com/Love-Kogasa/FileShare) | [~~简体~~ English](https://github.com/Love-Kogasa/FileShare/blob/main/README-EN.md) | [Vercel Demo](https://fileshare.lapis-net.top/)
 ~~本项目原计划命名为FileShare，但是这个名字吧，不太好，故更名为V-FileShare~~  
 同时支持 服务器环境/ServerLess，基于nodejs+fastify编写，易于操作 的开源免费下载站模板  
 无论DaLao还是这方面的新人都可以较为简单的搭建自己的下载站  
@@ -161,11 +162,4 @@ file2.txt:114514
 ls -1 > directoryc
 ```
 
-## 借物表
 (候补)
-
-## 对于啥也不会的小白
-(候补)
-### 几种免费域名的获取渠道
-(候补)
-
