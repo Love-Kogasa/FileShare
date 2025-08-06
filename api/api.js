@@ -23,6 +23,9 @@ function getPathData( url ) {
         fdata.realname = v.name
         fdata.name = path.basename( v.name, ".fsdurl" )
         fdata.isdir = true
+      } else if( path.extname( v.name ) == ".fsurls" ) {
+        fdata.realname = v.name
+        fdata.name = fs.readFileSync( path.join( filePath, v.name)).toString().split( "\n" )[0]
       }
       if( !readme && fdata.name.toLowerCase() == config.data.readme ){
         if( fdata.realname ){
@@ -37,7 +40,7 @@ function getPathData( url ) {
     return { diroutput, readme, empty }
   } else {
     var info = {}
-    info.downloadContext = { name: path.basename(url), path: path.join( "/public", config.data.files, url ), size: fsize(fstat.size).human( "jedec" ), date: fstat.mtime.toString() }
+    info.downloadContext = { name: path.basename(url), path: JSON.stringify(path.join( "/public", config.data.files, url )), size: fsize(fstat.size).human( "jedec" ), date: fstat.mtime.toString() }
     info.string = config.page[ "no-preview" ]
     return info
   }
@@ -60,6 +63,8 @@ function renderFileList( info, $default, fullurl ) {
           var urlroot = url.parse( file.url )
           urlroot = urlroot.protocol + "//" + urlroot.host + "/"
           files.push( `<a class="file" href="${file.realname}"><img src="/public/icons/${file.proxy? "cursor": "globe"}.svg" class="file-icon" style="margin-bottom: 0px;background-image: url( 'https://www.favicon.vip/get.php?url=${encodeURIComponent(urlroot)}' );"> <span style="display: inline-block">${file.name} <div class="comment">(${file.realname})</span></div></a>` )
+        } else if( file.realname && (path.extname( file.realname) == ".fsurls") ){
+          files.push( `<a class="file" href="${file.realname}"><img src="/public/icons/file-earmark.svg" class="file-icon" style="margin-bottom: 0px;"> <span style="display: inline-block">${file.name} <div class="comment">(${file.realname})</span></div></a>` )
         } else if( type.includes( "image" )){
           files.push( `<a class="file" href="${file.name}"><img src="${ info.imgPreviewer ? info.protocol + path.join( info.imgPreviewer, file.name ) : "/previewer" + path.join(fullurl, file.name)}" onerror="this.src = '/public/icons/card-image.svg';this.className = 'file-icon'" class="img-file-icon"> ${file.name}</a>` )
         } else if( type.includes( "video" )){

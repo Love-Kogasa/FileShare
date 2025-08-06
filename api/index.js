@@ -62,9 +62,16 @@ app.get( "/*", async ( req, reply ) => {
         } else {
           context.path = subject
         }
+      } else if( path.extname( url ) == ".fsurls" ) {
+        var {fileName, urls} = fnet.parseUrls(fs.readFileSync( realpath ).toString(), url)
+        context.path = urls
+        context.size = "Unknown Size"
+        context.name = fileName
+        info.toString = () => config.page["no-preview"]
       } else {
         info.toString = () => config.page["no-preview"]
       }
+      context.path = JSON.stringify( context.path)
       info.download = template( fs.readFileSync( __dirname + "/../public/_down.html" ).toString(), context )
     }
   } else {

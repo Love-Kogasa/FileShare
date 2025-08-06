@@ -40,6 +40,21 @@ function parse( code ){
   return request
 }
 
+function parseUrls( code, p ){
+  var [fnane, ...lines] = code.split( "\n" )
+  var urls = []
+  lines.forEach(( value, index ) => {
+    if( value[0] === "@" ){
+      urls.push(path.join( "/proxy", p + "?" + index ))
+    } else if( value[0] === "#" ) {
+      return;
+    } else {
+      urls.push( value )
+    }
+  })
+  return {fileName: fnane, urls}
+}
+
 async function handle( codePath, route, req, reply, actually ){
   if( actually || fs.existsSync( codePath ) ){
     if( typeof actually !== "string" ){
@@ -55,7 +70,10 @@ async function handle( codePath, route, req, reply, actually ){
     if( response.status > 400 ){
       reply.send( "Cannot Proxy " + subject )
       return; }
-    reply.raw.writeHead( response.status, { "content-type": response.headers.get( "content-type" ) } )
+    reply.raw.writeHead( response.status, {
+      "content-type": response.headers.get( "content-type" ),
+      "content-length": response.headers.get( "content-length")
+    } )
     var stream = response.body.getReader()
     await read()
     async function read(){
@@ -66,10 +84,19 @@ async function handle( codePath, route, req, reply, actually ){
     }
     reply.raw.end()
   } else if( isOnlineDir( codePath ) ){
-    console.log(codePath)
+    // console.log(codePath)
     var file = await parsed( codePath, req.url )
     if( file.proxy && file.downloadContext.source ){
       handle( null, route, req, reply, file.downloadContext.source )
+    } else {
+      reply.redirect( path.dirname( req.url.replace( route, "" ) ) )
+    }
+  } else if( fs.existsSync( codePath.split( "?" )[0]) ){
+    var [file, index] = codePath.split( "?" )
+    var code = fs.readFileSync( file ).toString()
+    var url = code.split( "\n")[parseInt(index) + 1]
+    if( url[0] === "@" ){
+      handle( null, route, req, reply, url.slice(1) )
     } else {
       reply.redirect( path.dirname( req.url.replace( route, "" ) ) )
     }
@@ -111,6 +138,7 @@ async function parsed( requestPath, requestUrl ){
           json.downloadContext.source = json.downloadContext.path
           json.downloadContext.path = path.join( "/proxy", requestUrl )
         }
+        json.downloadContext.path = JSON.stringify( json.downloadContext.path)
         json.download = template( fs.readFileSync( __dirname + "/../public/_down.html" ).toString(), json.downloadContext || {})
       }
       return json
@@ -139,7 +167,7 @@ async function parsed( requestPath, requestUrl ){
         var file = {}
         file.download = template( fs.readFileSync( __dirname + "/../public/_down.html" ).toString(), {
           source: config.proxy ? config[ "for" ] : void 0,
-          path: config.proxy ? path.join( "/proxy", requestUrl ) : config[ "for" ],
+          path: JSON.stringify( config.proxy ? path.join( "/proxy", requestUrl ) : config[ "for" ]),
           size: "Unknown size",
           name: path.basename( requestUrl )
         })
@@ -170,4 +198,4 @@ function isOnlineDir( url ){
   return false
 }
 
-module.exports = {parse, handle, parsed, isOnlineDir}
+module.exports = {parse, handle, parsed, isOnlineDir, parseUrls}

@@ -1,5 +1,5 @@
 项目施工中！  
-当前版本为 1.0-beta 版本，可能存在较多错误  
+当前版本为 1.1-beta 版本，可能存在较多错误  
 ## V-FileShare
 [中文](https://github.com/Love-Kogasa/FileShare) | [~~简体~~ English](https://github.com/Love-Kogasa/FileShare/blob/main/README-EN.md) | [Vercel Demo](https://fileshare.lapis-net.top/)
 ~~本项目原计划命名为FileShare，但是这个名字吧，不太好，故更名为V-FileShare~~  
@@ -99,6 +99,7 @@ Vercel不能正确的处理名字为README.md文件的文件存放目录，这�
 ### 对于大文件限制
 Vercel不适合存储超大文件，详见Vercel相关限制 https://vercel.com/docs/limits  
 您可以使用任意静态文件托管服务来存储文件(详见: [网络目录](#网络目录))，不过请注意对应平台的相关限制  
+您也可以使用多个url以分片下载文件，详见[分片下载](#分片下载)
 如果您使用的静态托管服务支持自定义域名，请在域名处启用代理服务，不用在网络目录的配置中启用proxy选项
 
 ### 现在开始
@@ -141,6 +142,20 @@ type    =   v-fileshare # 接口类型，支持v-fileshare和static
 for =   https://fileshare.lapis-net.top/fileApi/文件夹/Hello # 网络目录目标
 proxy   =   1 # 是否启用代理(0/1)
 ```
+
+## 分片下载
+对于超大文件，您可以将文件分割成多个片段存储在不同地方。通过这种方法，可以实现在前端对超大文件的下载，并且可以通过一些工具通过并发下载文件实现提高文件的下载速度.  
+通过创建一个.fsurls以代表一个分片文件
+```
+# 注释
+# @url 代表通过代理下载文件
+@https://example.com/
+# url 表示从前端下载文件，这需要目标允许文件被跨域请求
+# 常见的github page等都是支持跨域请求的
+# 以/开头表示本站路径，如
+/public/files/文件夹/子文件.txt
+```
+
 ### V-FileShare API
 V-FileShare API即本项目内置的API，任何人都有权访问(可以访问API目录≠可以下载文件)，API目录在/fileApi目录下  
 For Example 访问home目录: /fileApi/home/  

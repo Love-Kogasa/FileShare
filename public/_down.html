@@ -1,4 +1,10 @@
+<!-- Stream Saver -->
+<script src="https://cdn.jsdelivr.net/npm/streamsaver@2.0.6/StreamSaver.min.js"></script>
+
+<!-- downloader -->
+<script src="/public/download.js"></script>
+
 <!-- 下载 -->
 <p>点击下方按钮下载文件XD<br>您可能需要等待一段时间才能看到下载<br>这是服务器正在处理您的下载请求或请求还未送达</p>
-<a href="${path}" class="button" download="${name}">下载该文件(${size})</a>
+<a class="button" id="downloader" download="${name}" href='javascript:download(${path}, downloader)'>下载该文件(${size})</a>
 <br></br>
