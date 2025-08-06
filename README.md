@@ -1,7 +1,7 @@
 项目施工中！  
 当前版本为 1.1-beta 版本，可能存在较多错误  
 ## V-FileShare
-[中文](https://github.com/Love-Kogasa/FileShare) | [~~简体~~ English](https://github.com/Love-Kogasa/FileShare/blob/main/README-EN.md) | [Vercel Demo](https://fileshare.lapis-net.top/)
+[中文](https://github.com/Love-Kogasa/FileShare) | [~~简体~~ English](https://github.com/Love-Kogasa/FileShare/blob/main/README-EN.md) | [Vercel Demo](https://fileshare.lapis-net.top/)  
 ~~本项目原计划命名为FileShare，但是这个名字吧，不太好，故更名为V-FileShare~~  
 同时支持 服务器环境/ServerLess，基于nodejs+fastify编写，易于操作 的开源免费下载站模板  
 无论DaLao还是这方面的新人都可以较为简单的搭建自己的下载站  
@@ -133,16 +133,6 @@ xxx =   xxx
 xxx =   xxx # 如果启用json则将body中的内容编码成json，否则使用subject中的body作为请求主题
 ```
 
-## 网络目录
-V-FileShare 支持网络目录！  
-在 V-FileShare 中，您可以使用一个.fsdurl代表一个网络目录
-```ini
-[config]
-type    =   v-fileshare # 接口类型，支持v-fileshare和static
-for =   https://fileshare.lapis-net.top/fileApi/文件夹/Hello # 网络目录目标
-proxy   =   1 # 是否启用代理(0/1)
-```
-
 ## 分片下载
 对于超大文件，您可以将文件分割成多个片段存储在不同地方。通过这种方法，可以实现在前端对超大文件的下载，并且可以通过一些工具通过并发下载文件实现提高文件的下载速度.  
 通过创建一个.fsurls以代表一个分片文件
@@ -154,6 +144,16 @@ proxy   =   1 # 是否启用代理(0/1)
 # 常见的github page等都是支持跨域请求的
 # 以/开头表示本站路径，如
 /public/files/文件夹/子文件.txt
+```
+
+## 网络目录
+V-FileShare 支持网络目录！  
+在 V-FileShare 中，您可以使用一个.fsdurl代表一个网络目录
+```ini
+[config]
+type    =   v-fileshare # 接口类型，支持v-fileshare和static
+for =   https://fileshare.lapis-net.top/fileApi/文件夹/Hello # 网络目录目标
+proxy   =   1 # 是否启用代理(0/1)
 ```
 
 ### V-FileShare API
