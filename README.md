@@ -1,5 +1,5 @@
 项目施工中！  
-当前版本为 1.1-beta 版本，可能存在较多错误  
+当前版本为 1.15-beta 版本，可能存在较多错误  
 ## V-FileShare
 [中文](https://github.com/Love-Kogasa/FileShare) | [~~简体~~ English](https://github.com/Love-Kogasa/FileShare/blob/main/README-EN.md) | [Vercel Demo](https://fileshare.lapis-net.top/)  
 ~~本项目原计划命名为FileShare，但是这个名字吧，不太好，故更名为V-FileShare~~  
@@ -21,7 +21,7 @@ npm i
 ```bash
 npm i --no-bin-links
 ```
-启动
+启动(用于生产环境建议内存至少留出256MB)  
 ```bash
 npm run server
 ```
@@ -32,6 +32,7 @@ npm run serverless
 
 ## 下载站配置
 由于最初设计遗留问题，V-FileShare使用更易于编写的Ini作为配置文件格式  
+V-FileShare 1.15-beta 版本及以后均使用我自已写的ini解释器，而不依赖ini库，详见[ini代码规范](#Ini代码规范)  
 (config.ini)
 ```ini
 [page]
@@ -79,6 +80,10 @@ example =   https://lapis-net.top/
 enable  =   1 # 这个功能暂时有一些小问题，建议关闭
 character   =   chisato # 内置角色或custom，详见 https://github.com/dsrkafuu/sakana-widget/blob/main/README.zh.md
 img = # custom 使用的图片url，使用custom必须加载这个
+
+[route]
+; 自定义路由，格式
+; /abc = abc
 
 [data]
 files   =   /files # 下载站根目录对应的文件夹，在public文件夹下
@@ -175,6 +180,23 @@ file2.txt:114514
 您可以用ls命令快速生成一个列表
 ```bash
 ls -1 > directoryc
+```
+
+## Ini代码规范
+因为下载站的一些特殊配置需求需求，我在1.15-beta版本中加入了我自己写的ini方言的解释器，以下将此ini方言统称为xini  
+Xini支持ini所有的基本语法，此外还支持数组，多行字符串，转义字符等内容  
+因为js是软类型语言，现在一些1/0的部分也可以用true/false来代替
+```ini
+; 多行字符串示例
+string = line1 \
+  line2 \
+  line3
+
+; 数组示例
+[array]
+= subject 1
+= subject 2
+= subject 3
 ```
 
 (候补)

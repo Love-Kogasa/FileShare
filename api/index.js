@@ -1,5 +1,5 @@
 const fastify = require( "fastify" )
-const ini = require( "ini" )
+const ini = require( "./ini" )
 const fs = require( "fs" )
 const template = require( "template-string" )
 const path = require( "path" )
@@ -17,6 +17,9 @@ app.register(require( "@fastify/static" ), {
   prefix: "/public/"
 })
 
+for( let key in config.routes ){
+  app.get(path.join( "/", key), ( req, reply ) => { reply.redirect( config.route[key] ) })
+}
 app.get("/favicon.ico", ( req, reply ) => { reply.redirect( config.page.favicon ) })
 if( config.data.domain ) app.get("/sitemap.txt", require("./routes/sitemap"))
 app.get("/previewer/*", require("./routes/previewer"))
@@ -107,7 +110,7 @@ app.get( "/*", async ( req, reply ) => {
     menuRender += `<div style="margin-top: 0.7ch;"><a href=${link}><img src="https://www.favicon.vip/get.php?url=${encodeURIComponent(urlroot)}" class="icon" alt="${line}"></a></div>`
   }
   var sakanaWidgetRender = ""
-  if( parseInt(config[ "sakana-widget" ].enable) ){
+  if( config[ "sakana-widget" ].enable ){
     var customCharacter = ( img ) => `const custom = SakanaWidget.getCharacter( "chisato" )
     custom.image = ${JSON.stringify( img )}
     SakanaWidget.registerCharacter( "custom", custom" )`

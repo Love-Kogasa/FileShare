@@ -1,4 +1,4 @@
-const ini = require( "ini" )
+const ini = require( "./ini" )
 const url = require( "url" )
 const path = require( "path" )
 const fs = require( "fs" )
@@ -20,7 +20,7 @@ function parse( code ){
     request.proxy = true
     request.subject = config.subject.url
     request.option.method = config.subject.method
-    if( parseInt(config.subject.json) ){
+    if( config.subject.json ){
       request.option.body = JSON.stringify(config.body)
       request.option.headers[ "content-type" ] = "application/json"
     } else {
@@ -134,7 +134,7 @@ async function parsed( requestPath, requestUrl ){
         var subjectConfig = await (await fetch( json.protocol + path.join( urlObject.host, "config" ) )).json()
         json.toString = () => json.string
         json.downloadContext.path = json.protocol + path.join( urlObject.host, json.downloadContext.path )
-        if( parseInt( json.proxy)){
+        if( json.proxy ){
           json.downloadContext.source = json.downloadContext.path
           json.downloadContext.path = path.join( "/proxy", requestUrl )
         }
