@@ -2,7 +2,8 @@ const fs = require( "fs" ),
   path = require( "path" ),
   mimetype = require( "mimetype" ),
   fsize = require( "file-size" ),
-  fnet = require( "./fsurl" )
+  fnet = require( "./fsurl" ),
+  url = require( "url" )
 
 var {config, getRealPath} = require( "./config" )
 

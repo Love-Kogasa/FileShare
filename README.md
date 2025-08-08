@@ -1,9 +1,9 @@
 项目施工中！  
-当前版本为 1.15-beta 版本，可能存在较多错误  
+当前版本为 1.2-beta 版本，可能存在较多错误  
 ## V-FileShare
 [中文](https://github.com/Love-Kogasa/FileShare) | [~~简体~~ English](https://github.com/Love-Kogasa/FileShare/blob/main/README-EN.md) | [Vercel Demo](https://fileshare.lapis-net.top/)  
 ~~本项目原计划命名为FileShare，但是这个名字吧，不太好，故更名为V-FileShare~~  
-同时支持 服务器环境/ServerLess，基于nodejs+fastify编写，易于操作 的开源免费下载站模板  
+同时支持 服务器环境/ServerLess/静态页托管，基于nodejs+fastify编写，易于操作 的开源免费下载站模板  
 无论DaLao还是这方面的新人都可以较为简单的搭建自己的下载站  
 <!--如果您不熟悉Nodejs以及建站相关内容，请[点我](#免费搭建文件下载站)  -->
 
@@ -28,6 +28,11 @@ npm run server
 启动(Vercel ServerLess测试)
 ```bash
 npm run serverless
+```
+生成静态页(1.2-beta) [详见](#生成静态页)
+```bash
+npm i --save-dev
+npm run generate
 ```
 
 ## 下载站配置
@@ -91,6 +96,21 @@ domain  =   http://fileshare.lapis-net.top # 域名，目前仅用于生成sitem
 readme  =   readme.md # Vercel这里要改成别的(如readthis.md)，要不访问不到文件，详见下文vercel部署的注意事项
 
 ```
+
+## 生成静态页
+1.2-beta 之后，V-FileShare允许用户生成静态页文件  
+这样做可以极大的提高性能，以及资源消耗  
+```bash
+# 安装依赖项
+npm i --save-dev --no-bin-links
+# 生成
+npm run generate
+```
+之后您可以在您当前目录的dist文件夹找到静态页文件的输出  
+相关设置如需更改见 __cli/generate-config.js__  
+生成之后请求转发将不再生效，您可以手动下载文件转移到指定目录中  
+当前版本生成的静态文件在chrome无法正常加载cdn文件  
+生成之后的404页面与服务404页面相同
 
 ## 使用 Vercel 免费部署
 v-fileshare 支持使用Vercel进行部署  

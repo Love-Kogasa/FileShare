@@ -2,6 +2,8 @@
   "scripts": {
     "server": "node -e 'require( \"./api\" ).start()'",
     "serverless": "vercel dev",
+    "build-bridge": "browserify cli/static/index.js -o cli/static/index.dist.js",
+    "generate": "node cli/generator",
     "list": "tree public",
     "ls": "tree public"
   },
@@ -13,5 +15,8 @@
     "markdown-it": "^14.1.0",
     "mimetype": "^0.0.8",
     "template-string": "^1.1.2"
+  },
+  "devDependencies": {
+    "quick-hash": "^1.0.4"
   }
 }
